@@ -45,4 +45,5 @@ class Book(BaseModel):
 
 class Library(BaseModel):
     """Library"""
+
     books: list[Book]
