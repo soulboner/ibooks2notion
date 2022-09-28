@@ -2,8 +2,9 @@
 """
 
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
+# pylint: disable=too-few-public-methods
 
 class Annotation(BaseModel):
     """Annotation"""

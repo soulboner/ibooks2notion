@@ -8,7 +8,7 @@ from typing import Iterable
 from core.models import Annotation, Book, Collection, Library
 
 
-COLLECTION_QUERY = """ 
+COLLECTION_QUERY = """
 SELECT
 	c.ZTITLE AS name,
 	cb.ZCOLLECTION AS id,
@@ -24,7 +24,7 @@ LEFT JOIN ZBKLIBRARYASSET b ON
 	cb.ZASSETID = b.ZASSETID;
 """
 
-BOOK_QUERY = """ 
+BOOK_QUERY = """
 SELECT
     ZASSETID AS id,
 	ZAUTHOR AS author,
@@ -41,7 +41,7 @@ FROM
 	ZBKLIBRARYASSET;
 """
 
-ANNOTATION_QUERY = """ 
+ANNOTATION_QUERY = """
 SELECT
 	Z_PK AS id,
 	ZANNOTATIONASSETID AS book_id,
@@ -58,10 +58,11 @@ WHERE
 
 def _dict_factory(cursor, row):
     col_names = [col[0] for col in cursor.description]
-    return {key: value for key, value in zip(col_names, row)}
+    return dict(zip(col_names, row))
 
 
 def run_query(db: str, query: str) -> Iterable[dict]:
+    """Run SQL query in SQLite"""
     con = sqlite3.connect(db)
     con.row_factory = _dict_factory
     for row in con.execute(query):
@@ -69,6 +70,7 @@ def run_query(db: str, query: str) -> Iterable[dict]:
 
 
 class IBooksExtractor:
+    """Extractor to get data about collections, books, and annotations from iBooks"""
     def __init__(
         self, book_path: str | None = None, annotation_path: str | None = None
     ):
@@ -77,6 +79,7 @@ class IBooksExtractor:
 
     @property
     def book_path(self) -> str:
+        """Generate book path from user input or as absolute path"""
         if self._book_path is not None:
             return self._book_path
         libpath = os.path.join(
@@ -87,6 +90,7 @@ class IBooksExtractor:
 
     @property
     def annotation_path(self) -> str:
+        """Generate annotation path from user input or as absolute path"""
         if self._annotation_path is not None:
             return self._annotation_path
         libpath = os.path.join(
@@ -96,6 +100,7 @@ class IBooksExtractor:
         return glob(os.path.join(libpath, "*.sqlite"))[0]
 
     def extract(self) -> Library:
+        """Extract data"""
         annotations = [
             Annotation(**a) for a in run_query(self.annotation_path, ANNOTATION_QUERY)
         ]
